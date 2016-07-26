@@ -75,9 +75,12 @@ def extract_data(json_data, results_csv, results_bzlike):
         issue_state = issue['state'].encode('utf-8')
         cf_last_resolved = issue['closed_at']
         if issue_state == 'open':
-            status = 'OPEN'
+            state = 'OPEN'
         else:
-            status = 'RESOLVED'
+            state = 'RESOLVED'
+        for label in issue['labels']:
+            if 'status-' in label['name']:
+                label['name'] = label['name'].split('status-')[1]
         # Extracting the labels
         labels_list = [label['name'] for label in issue['labels']]
         # areWEcompatibleyet is only about mozilla bugs
@@ -109,7 +112,7 @@ def extract_data(json_data, results_csv, results_bzlike):
                       "op_sys": op_sys,
                       "creation_time": creation_time,
                       "last_change_time": last_change_time,
-                      "status": status,
+                      "state": state,
                       "cf_last_resolved": cf_last_resolved,
                       "resolution": resolution,
                       "body": body
@@ -142,7 +145,7 @@ def get_webcompat_data(url_repo=URL_REPO):
 
     Start with the first page and follow hypermedia links to explore the rest.
     '''
-    next_link = '%s/issues?per_page=100&page=1' % (url_repo)
+    next_link = '%s/issues?state=all&per_page=100&page=1' % (url_repo)
     results = []
     bzresults = []
 
